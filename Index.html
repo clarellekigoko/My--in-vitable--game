@@ -1,0 +1,43 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Inevitable - The Game</title>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<style>body{margin:0;background:#ffdde1;overflow:hidden} canvas{display:block;margin:0 auto}</style>
+</head>
+<body>
+<script>
+const config={type:Phaser.AUTO,width:360,height:640,backgroundColor:'#ffdde1',physics:{default:'arcade',arcade:{gravity:{y:400}}},scene:{create,update}};
+let player,platforms,hearts,abri,score=0,level=0;
+let game=new Phaser.Game(config);
+const msgs=["Tu es mon abri...","Chaque doute m'a ramené à toi","Tu étais mon évidence"];
+function create(){
+this.add.text(10,10,`Niveau ${level+1}/3 - Coeurs: ${score}`,{fontSize:'16px',color:'#d6336c'});
+this.add.text(180,90,msgs[level],{fontSize:'14px',color:'#a61e4d'}).setOrigin(0.5);
+platforms=this.physics.add.staticGroup();
+platforms.create(180,630,null).setScale(5,1).refreshBody();
+this.add.rectangle(180,630,360,40,0xffb3c1);
+platforms.create(150,500,null).setScale(1,0.5).refreshBody();
+this.add.rectangle(150,500,120,15,0xff8fa3);
+platforms.create(250,380,null).setScale(1,0.5).refreshBody();
+this.add.rectangle(250,380,120,15,0xff8fa3);
+player=this.physics.add.sprite(50,550,null);
+player.txt=this.add.text(0,0,'❤️',{fontSize:'24px'}).setOrigin(0.5);
+player.setBounce(0.2).setCollideWorldBounds(true);
+abri=this.physics.add.staticSprite(300,300,null);
+this.add.text(300,300,'🏠',{fontSize:'36px'}).setOrigin(0.5);
+hearts=this.physics.add.group();
+for(let i=0;i<3;i++){let h=hearts.create(Phaser.Math.Between(50,300),Phaser.Math.Between(200,500),null);h.t=this.add.text(0,0,'💗',{fontSize:'20px'}).setOrigin(0.5);}
+this.physics.add.collider(player,platforms);
+this.physics.add.overlap(player,hearts,(p,h)=>{h.t.destroy();h.destroy();score++;});
+this.physics.add.overlap(player,abri,()=>{level++;if(level<3){this.scene.restart();}else{this.add.rectangle(180,320,300,200,0xffffff);this.add.text(180,320,'Tu étais mon évidence\n\nCoeurs: '+score+' 💖',{fontSize:'20px',color:'#d6336c',align:'center'}).setOrigin(0.5);player.body.moves=false;}});
+this.input.on('pointerdown',p=>{if(p.x<180)player.setVelocityX(-200);else player.setVelocityX(200);if(player.body.touching.down)player.setVelocityY(-300);});
+this.input.on('pointerup',()=>player.setVelocityX(0));
+}
+function update(){player.txt.x=player.x;player.txt.y=player.y;hearts.children.iterate(h=>{if(h&&h.t){h.t.x=h.x;h.t.y=h.y;}});}
+</script>
+</body>
+</html>
